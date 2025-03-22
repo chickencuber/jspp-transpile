@@ -1,0 +1,21 @@
+{
+  "name": "jspp-compiler",
+  "version": "1.0.0",
+  "description": "a transpiler for the js++ language",
+  "keywords": [
+    "jspp"
+  ],
+  "license": "MIT",
+  "author": "chickencuber",
+  "type": "module",
+  "bin": {
+    "jspp": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "acorn": "^8.14.1",
+    "astring": "^1.9.0"
+  }
+}
