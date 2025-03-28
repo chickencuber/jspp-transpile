@@ -446,6 +446,7 @@ function Macros(Parser) {
                 });
                 this.next();
             }
+            args.pop();
             return args;
         }
     };
