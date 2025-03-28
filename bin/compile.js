@@ -437,13 +437,13 @@ function Macros(Parser) {
                     depth--;
                 } else if (this.type === types.eof) {
                     this.unexpected();
-                } else {
-                    args.push({
-                        type: this.type,
-                        value: this.value,
-                        raw: this.input.slice(this.start, this.end),
-                    });
                 }
+
+                args.push({
+                    type: this.type,
+                    value: this.value,
+                    raw: this.input.slice(this.start, this.end),
+                });
                 this.next();
             }
             return args;
