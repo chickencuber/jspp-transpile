@@ -1,5 +1,6 @@
 import * as acorn from "acorn";
 import * as astring from "astring";
+import "./std.js"
 
 
 //language
