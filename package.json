@@ -1,6 +1,6 @@
 {
   "name": "jspp-compiler",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "a transpiler for the js++ language",
   "keywords": [
     "jspp"
