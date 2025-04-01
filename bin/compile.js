@@ -550,7 +550,6 @@ export function compile(str) {
     const ast = macroParser.parse(str, {
         ecmaVersion: "latest",
     });
-    console.dir(ast);
     const code = astring.generate(ast, {
         generator: GENERATOR,
         lineEnd: " ",
