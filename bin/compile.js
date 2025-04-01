@@ -275,7 +275,7 @@ function Macros(Parser) {
             literal.raw = literal.value;
             const node = this.startNode();
             node.expression = this.finishNode(literal, "Literal");
-            return this.finishNode(node, "ExpressionStatement"); 
+            return this.finishNode(node, "EXC"); 
         }
         parseStatement() {
             if (this.type === types.decorator) {
@@ -317,7 +317,7 @@ function Macros(Parser) {
                 literal.raw = literal.value;
                 const node = this.startNode();
                 node.expression = this.finishNode(literal, "Literal");
-                return this.finishNode(node, "ExpressionStatement");
+                return this.finishNode(node, "EXC");
             }
             if (this.type === types.alias) {
                 this.next();
@@ -352,7 +352,7 @@ function Macros(Parser) {
                 literal.raw = literal.value;
                 const node = this.startNode();
                 node.expression = this.finishNode(literal, "Literal");
-                return this.finishNode(node, "ExpressionStatement");
+                return this.finishNode(node, "EXC");
             }
             return super.parseStatement();
         }
@@ -497,6 +497,7 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
             useSelf(node.right, state);
             state.write(")");
     },
+    EXC() {},
     AssignmentExpression(node, state) {
         if(!overloadables.includes(node.operator)) {
             useOG(node, state);
@@ -533,7 +534,8 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         state.write("(");
             useSelf(node.argument, state);
             state.write(`)["${op}"]()`);
-    }
+    },
+    EmptyStatement() {}
 });
 function useSelf(node, state) {
     GENERATOR[node.type](node, state);
@@ -548,12 +550,13 @@ export function compile(str) {
     const ast = macroParser.parse(str, {
         ecmaVersion: "latest",
     });
+    console.dir(ast);
     const code = astring.generate(ast, {
         generator: GENERATOR,
         lineEnd: " ",
         indent: " ",
 
     });
-    return code;
+    return code.trim();
 }
 
