@@ -182,6 +182,10 @@ function Macros(Parser) {
                     const name = type.id.name;
                     let raw = astring.generate(type, {
                         generator: GENERATOR,
+                        options: {
+                            lineEnd: " ",
+                            indent: " ",
+                        }
                     });
                     raw = raw.trim().endsWith(";")
                     ? raw.trim().slice(0, -1)
@@ -194,6 +198,11 @@ function Macros(Parser) {
                     const fname = type.id.name;
                     let fnraw = astring.generate(type, {
                         generator: GENERATOR,
+                        options: {
+                            lineEnd: " ",
+                            indent: " ",
+                        }
+
                     });
                     fnraw = fnraw.trim().endsWith(";")
                     ? fnraw.trim().slice(0, -1)
@@ -209,9 +218,19 @@ function Macros(Parser) {
                     const computed = type.computed;
                     const name = astring.generate(type.key, {
                         generator: GENERATOR,
+                        options: {
+                            lineEnd: " ",
+                            indent: " ",
+                        }
+
                     });
                     let fn = astring.generate(type.value, {
-                        generator: GENERATOR
+                        generator: GENERATOR,
+                        options: {
+                            lineEnd: " ",
+                            indent: " ",
+                        }
+
                     });
                     fn = fn.trim().endsWith(";")
                     ? fn.trim().slice(0, -1)
@@ -250,6 +269,11 @@ function Macros(Parser) {
             }
             const code = astring.generate(type, {
                 generator: GENERATOR,
+                options: {
+                    lineEnd: " ",
+                    indent: " ",
+                }
+
             });
             const v = "(" + (code.endsWith(";") ? code.trim().slice(0, -1) : code.trim()) + ")";
             macros.set(type.id.name, {
@@ -367,6 +391,11 @@ function Macros(Parser) {
                 const ast = this.parseExprAtom();
                 const code = astring.generate(ast, {
                     generator: GENERATOR,
+                    options: {
+                        lineEnd: " ",
+                        indent: " ",
+                    }
+
                 });
                 const v = code.endsWith(";") ? code.trim().slice(0, -1) : code.trim();
                 const node = this.startNode();
@@ -379,6 +408,11 @@ function Macros(Parser) {
                 const ast = this.parseExprAtom();
                 const code = astring.generate(ast, {
                     generator: GENERATOR,
+                    options: {
+                        lineEnd: " ",
+                        indent: " ",
+                    }
+
                 });
                 const v = code.endsWith(";") ? code.trim().slice(0, -1) : code.trim();
                 const node = this.startNode();
@@ -496,6 +530,11 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         });
         const code = astring.generate(ast, {
             generator: GENERATOR,
+            options: {
+                lineEnd: " ",
+                indent: " ",
+            }
+
         });
         state.write(
             code.trim().endsWith(";") ? code.trim().slice(0, -1) : code.trim()
@@ -527,6 +566,11 @@ export function compile(str) {
     });
     const code = astring.generate(ast, {
         generator: GENERATOR,
+        options: {
+            lineEnd: " ",
+            indent: " ",
+        }
+
     });
     return code;
 }
