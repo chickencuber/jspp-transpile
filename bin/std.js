@@ -97,14 +97,8 @@ for(const v of [
         ["=="](other) {
             return this.valueOf() == other.valueOf();
         },
-        ["==="](other) {
-            return this.valueOf() === other.valueOf();
-        },
         ["!="](other) {
             return this.valueOf() != other.valueOf();
-        },
-        ["!=="](other) {
-            return this.valueOf() !== other.valueOf();
         },
         ["<"](other) {
             return this.valueOf() < other.valueOf();

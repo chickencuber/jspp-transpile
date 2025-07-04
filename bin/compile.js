@@ -48,9 +48,7 @@ const overloadables = [
     "!",
     //comparision
     "==",
-    "===",
     "!=",
-    "!==",
     "<",
     ">",
     "<=",
