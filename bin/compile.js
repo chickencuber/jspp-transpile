@@ -552,9 +552,6 @@ export function compile(str) {
     });
     const code = astring.generate(ast, {
         generator: GENERATOR,
-        lineEnd: " ",
-        indent: " ",
-
     });
     return code.trim();
 }
