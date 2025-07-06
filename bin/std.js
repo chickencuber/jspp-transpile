@@ -40,6 +40,7 @@ for(const v of [
     String,
     Number,
     Boolean,
+    Bigint,
 ]) {
     Object.addAll(v.prototype, {
         //math
