@@ -6,6 +6,7 @@ import "./std.js"
 //language
 const macros = new Map();
 const alias = new Map();
+const modules = [];
 
 const types = acorn.tokTypes;
 types.alias = (() => {
@@ -175,6 +176,11 @@ function Macros(Parser) {
             return content;
         }
         parseDecorator(dname, type) {
+            let _export = false;
+            if(type === "Exporting_Statement") {
+                type = type.body;
+                _export = true;
+            }
             switch (type.type) {
                 case "ClassDeclaration": {
                     const name = type.id.name;
@@ -187,7 +193,7 @@ function Macros(Parser) {
                     ? raw.trim().slice(0, -1)
                     : raw.trim();
                     const node = this.startNode();
-                    node.rawCode = `var ${name} = ${dname}(${raw}, "class");`;
+                    node.rawCode = `var ${name} = ${dname}(${raw}, "class");${_export?`__jspp__exports__["${name}"] = ${name}`:""};`;
                     return this.finishNode(node, "MacroInvocation");
                 }
                 case "FunctionDeclaration": {
@@ -202,7 +208,7 @@ function Macros(Parser) {
                     ? fnraw.trim().slice(0, -1)
                     : fnraw.trim();
                     const node = this.startNode();
-                    node.rawCode = `var ${fname} = ${dname}(${fnraw}, "function");`;
+                    node.rawCode = `var ${fname} = ${dname}(${fnraw}, "function");${_export?`__jspp__exports__["${fname}"] = ${fname}`:""};`;
                     return this.finishNode(node, "MacroInvocation");
                 }
                 case "MethodDefinition": {
@@ -316,6 +322,40 @@ function Macros(Parser) {
                 const node = this.startNode();
                 node.expression = this.finishNode(literal, "Literal");
                 return this.finishNode(node, "EXC");
+            }
+            if(this.type === types._import) {
+                if(this.options.sourceType !== "module" || this.scopeStack.length !== 1) {
+                    this.raise(this.pos, "import and export must be on the top level")
+                }
+                this.next();
+                if(this.type.label !== "string") {
+                    this.raise(this.pos, "expected a string");
+                }
+                const fs = this.value;
+                modules.push(fs);
+                this.next();
+                if(this.value !== "as" || this.type.label !== "name") {
+                    this.raise(this.pos, "expected keyword as");                   
+                }
+                this.next();
+                const name = this.parseIdent().name;
+                const node = this.startNode();
+                node.file = fs;
+                node.ident = name;
+                return this.finishNode(node, "Importing_Statement");
+            }
+            if(this.type === types._export) {
+                if(this.options.sourceType !== "module" || this.scopeStack.length !== 1) {
+                    this.raise(this.pos, "import and export must be on the top level")
+                }
+                this.next();
+                if(this.shouldParseExportStatement()) {
+                    const node = this.startNode();
+                    node.body = this.parseStatement();
+                    return this.finishNode(node, "Exporting_Statement");
+                } else {
+                    this.raise(this.pos, "unexpected keyword");
+                }
             }
             if (this.type === types.alias) {
                 this.next();
@@ -523,6 +563,13 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
             code.trim().endsWith(";") ? code.trim().slice(0, -1) : code.trim()
         );
     },
+    Importing_Statement(node, state) {
+        state.write(`const ${node.ident} = (__jspp__modules__.get("${node.file}"))();`);
+    },
+    Exporting_Statement(node, state) {
+        useSelf(node.body, state);
+        state.write(`;__jspp__exports__["${node.body.id.name}"] = ${node.body.id.name};`);
+    },
     UnaryExpression(node, state) {
         const op = node.operator;
         if(op === "+" || op === "-" || !overloadables.includes(op)) {
@@ -542,15 +589,19 @@ function useOG(node, state) {
     astring.GENERATOR[node.type].call(GENERATOR, node, state);
 }
 export function compile(str) {
+    macros.clear();
+    alias.clear();
+    modules.length = 0;
     if (str === '{"message":"Asset does not exist"}') {
         throw new Error("asset does not exist");
     }
     const ast = macroParser.parse(str, {
         ecmaVersion: "latest",
+        sourceType: "module",
     });
     const code = astring.generate(ast, {
         generator: GENERATOR,
     });
-    return code.trim();
+    return [code.trim(), modules];
 }
 
