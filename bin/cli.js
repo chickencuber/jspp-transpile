@@ -5,14 +5,13 @@ import * as fs from "fs";
 import * as path from "path"
 import {compile} from "./compile.js"
 
-function readDir(v) {
+function readDir(v, files = {}) {
     const s = fs.readdirSync(v);
-    const files = {} 
     for(const name of s) {
         const p = path.join(v, name);
         const stat = fs.statSync(p);
         if(stat.isDirectory()) {
-            files.push(...readDir(p));
+            readDir(p, files);
         } else {
             if(p.endsWith(".jspp"))
                 files[p] = {
