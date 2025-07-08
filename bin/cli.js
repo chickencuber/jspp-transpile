@@ -58,16 +58,26 @@ function addcompile(filename) {
 }
 
 function done(std) {
-    let str = std + "\nconst __jspp__modules__ = new Map();\n" 
+    const get = `
+if(__jspp__modules__.cache.has(k)) return __jspp__modules__.cache.get(k);
+const v = __jspp__modules__.v.get(k)();
+__jspp__modules__.cache.set(k, v);
+return v;
+    `
+    let str = "(function() {" + std + "\nconst __jspp__modules__ = {v: new Map, cache: new Map,get(k){"+get+"}, set(k, v){__jspp__modules__.v.set(k, v)}}\n" 
     for(const [fname, contents] of Object.entries(compts)) {
-        if(fname === name) continue;
         str += `__jspp__modules__.set("${fname}", function(){
 const __jspp__exports__ = {};
 ${contents}
 return __jspp__exports__;
 });\n`
     }
-    str += "const __jspp__exports__ = {}; \n" + compts[name];
+    str += `(function() {
+    const mod = __jspp__modules__.get("${name}");
+    for(const [k, v] of Object.entries(mod)) {
+        window[k] = v;
+    }
+})()})();`
     fs.writeFileSync(out, str);
 }
 

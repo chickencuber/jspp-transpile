@@ -281,7 +281,16 @@ function Macros(Parser) {
             node.expression = this.finishNode(literal, "Literal");
             return this.finishNode(node, "EXC"); 
         }
-        parseStatement() {
+        shouldParseExportStatement() {
+            return this.type.keyword === "var" ||
+                this.type.keyword === "const" ||
+                this.type.keyword === "class" ||
+                this.type.keyword === "function" ||
+                (this.type === types.name && this.value === "mod")||
+                this.isLet() ||
+                this.isAsyncFunction()
+        }
+        parseStatement(ctx, toplevel) {
             if (this.type === types.decorator) {
                 this.next();
                 let dname;
@@ -295,13 +304,13 @@ function Macros(Parser) {
                         this.raise(this.pos, "you need to add '!' in order to use 'proc' decorator");
                     }
                     this.next();
-                    const type = this.parseStatement();
+                    const type = this.parseStatement(ctx, toplevel);
                     return this.parseProc(type);
                 }
                 if(this.type === types.parenL) {
                     dname += `(${this.parseMacroArgs().join(", ")})`;
                 }
-                const type = this.parseStatement();
+                const type = this.parseStatement(ctx, toplevel);
                 return this.parseDecorator(dname, type);
             }
             if (this.type === types.macro) {
@@ -324,7 +333,7 @@ function Macros(Parser) {
                 return this.finishNode(node, "EXC");
             }
             if(this.type === types._import) {
-                if(this.options.sourceType !== "module" || this.scopeStack.length !== 1) {
+                if(this.options.sourceType !== "module" || !toplevel) {
                     this.raise(this.pos, "import and export must be on the top level")
                 }
                 this.next();
@@ -344,19 +353,30 @@ function Macros(Parser) {
                 node.ident = name;
                 return this.finishNode(node, "Importing_Statement");
             }
+            if(this.type === types.name && this.value === "mod") {
+                if(this.options.sourceType !== "module" || !toplevel) {
+                    this.raise(this.pos, "mod must be on the top level")
+                }
+                this.next();
+                const name = this.parseIdent();
+                const block = this.parseBlock(true, this.startNode(), undefined, true);
+                const node = this.startNode();
+                node.id = name;
+                node.block = block;
+                return this.finishNode(node, "module_start");
+            }
             if(this.type === types._export) {
-                if(this.options.sourceType !== "module" || this.scopeStack.length !== 1) {
+                if(this.options.sourceType !== "module" || !toplevel) {
                     this.raise(this.pos, "import and export must be on the top level")
                 }
                 this.next();
                 if(this.shouldParseExportStatement()) {
                     const node = this.startNode();
-                    node.body = this.parseStatement();
+                    node.body = this.parseStatement(ctx, toplevel);
                     return this.finishNode(node, "Exporting_Statement");
                 } else {
                     this.raise(this.pos, "unexpected keyword");
-                }
-            }
+                } }
             if (this.type === types.alias) {
                 this.next();
                 if (this.value !== "!") {
@@ -392,7 +412,20 @@ function Macros(Parser) {
                 node.expression = this.finishNode(literal, "Literal");
                 return this.finishNode(node, "EXC");
             }
-            return super.parseStatement();
+            return super.parseStatement(ctx, toplevel);
+        }
+        parseBlock(createNewLexicalScope = true, node = this.startNode(), exitStrict, topLevel = false) {
+            node.body = []
+            this.expect(types.braceL)
+            if (createNewLexicalScope) this.enterScope(0)
+            while (this.type !== types.braceR) {
+                let stmt = this.parseStatement(null, topLevel)
+                node.body.push(stmt)
+            }
+            if (exitStrict) this.strict = false
+            this.next()
+            if (createNewLexicalScope) this.exitScope()
+            return this.finishNode(node, "BlockStatement")
         }
         getName(str) {
             if (!str.includes("v")) {
@@ -564,11 +597,17 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         );
     },
     Importing_Statement(node, state) {
-        state.write(`const ${node.ident} = (__jspp__modules__.get("${node.file}"))();`);
+        state.write(`const ${node.ident} = (__jspp__modules__.get("${node.file}"));`);
     },
     Exporting_Statement(node, state) {
         useSelf(node.body, state);
         state.write(`;__jspp__exports__["${node.body.id.name}"] = ${node.body.id.name};`);
+    },
+    module_start(node, state) {
+        state.write(`const ${node.id.name} = (function() {
+const __jspp__exports__ = {};\n`)
+        useSelf(node.block, state); 
+        state.write(`\nreturn __jspp__exports__;})();\n`)
     },
     UnaryExpression(node, state) {
         const op = node.operator;
