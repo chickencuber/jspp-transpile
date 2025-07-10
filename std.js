@@ -36,13 +36,14 @@ Object.addAll = function(obj, values) {
     } 
 }
 
+if(!Symbol.overload) Symbol.overload = Symbol("overload");
 for(const v of [
     String,
     Number,
     Boolean,
     BigInt,
 ]) {
-    Object.addAll(v.prototype, {
+    v.prototype[Symbol.overload] = {
         //math
         ["+"](other) {
             return this.valueOf() + other.valueOf();
@@ -194,10 +195,12 @@ for(const v of [
             v--;
             return v;
         }
-    })
+    };
 }
 
-String.prototype["*"] = function(other) {
+
+
+String.prototype[Symbol.overload]["*"] = function(other) {
     return this.repeat(other);
 }
 
@@ -210,7 +213,7 @@ function __multiple_decor(...decorators) {
     }
 }
 
-Symbol.display = Symbol("display");
+if(!Symbol.display) Symbol.display = Symbol("display");
 
 window.console = new Proxy(
     window.console,

@@ -554,7 +554,7 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         useSelf(node.argument, state)
         state.write("=(");
             useSelf(node.argument, state)
-            state.write(`)["${node.operator}"]()`
+            state.write(`)[Symbol.overload]["${node.operator}"]()`
         );
     },
     BinaryExpression(node, state) {
@@ -564,7 +564,7 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         }
         state.write("(");
             useSelf(node.left, state);
-            state.write(`)["${node.operator}"](`);
+            state.write(`)[Symbol.overload]["${node.operator}"](`);
             useSelf(node.right, state);
             state.write(")");
     },
@@ -577,7 +577,7 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         useSelf(node.left, state);
         state.write("=(");
             useSelf(node.left, state);
-            state.write(`)["${node.operator}"](`);
+            state.write(`)[Symbol.overload]["${node.operator}"](`);
             useSelf(node.right, state);
             state.write(")");
     },

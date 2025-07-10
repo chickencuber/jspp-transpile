@@ -23,6 +23,7 @@ export function* range(s, e, inc=1) {
         yield i;
     }
 }
+Symbol.overload = Symbol("overload")
 
 export function wait(millis) {
     return new Promise((r) => {
@@ -42,7 +43,7 @@ for(const v of [
     Boolean,
     BigInt,
 ]) {
-    Object.addAll(v.prototype, {
+    v.prototype[Symbol.overload] =  {
         //math
         ["+"](other) {
             return this.valueOf() + other.valueOf();
@@ -194,10 +195,10 @@ for(const v of [
             v--;
             return v;
         }
-    })
+    };
 }
 
-String.prototype["*"] = function(other) {
+String.prototype[Symbol.overload]["*"] = function(other) {
     return this.repeat(other);
 }
 
