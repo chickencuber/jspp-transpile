@@ -43,155 +43,147 @@ for(const v of [
     Boolean,
     BigInt,
 ]) {
-    v.prototype[Symbol.overload] = {
+    v[Symbol.overload] = {
         //math
-        ["+"](other) {
-            return this.valueOf() + other.valueOf();
+        ["+"](a, b) {
+            return a.valueOf() + b.valueOf();
         },
-        ["-"](other) {
-            return this.valueOf() - other.valueOf();
+        ["-"](a, b) {
+            return a.valueOf() - b.valueOf();
         },
-        ["*"](other) {
-            return this.valueOf() * other.valueOf();
+        ["*"](a, b) {
+            return a.valueOf() * b.valueOf();
         },
-        ["/"](other) {
-            return this.valueOf() / other.valueOf();
+        ["/"](a, b) {
+            return a.valueOf() / b.valueOf();
         },
-        ["%"](other) {
-            return this.valueOf() % other.valueOf();
+        ["%"](a, b) {
+            return a.valueOf() % b.valueOf();
         },
-        ["**"](other) {
-            return this.valueOf() ** other.valueOf();
+        ["**"](a, b) {
+            return a.valueOf() ** b.valueOf();
         },
         //bitwise
-        ["&"](other) {
-            return this.valueOf() & other.valueOf();
+        ["&"](a, b) {
+            return a.valueOf() & b.valueOf();
         },
-        ["|"](other) {
-            return this.valueOf() | other.valueOf();
+        ["|"](a, b) {
+            return a.valueOf() | b.valueOf();
         },
-        ["^"](other) {
-            return this.valueOf() ^ other.valueOf();
+        ["^"](a, b) {
+            return a.valueOf() ^ b.valueOf();
         },
-        ["<<"](other) {
-            return this.valueOf() << other.valueOf();
+        ["<<"](a, b) {
+            return a.valueOf() << b.valueOf();
         },
-        [">>"](other) {
-            return this.valueOf() >> other.valueOf();
+        [">>"](a, b) {
+            return a.valueOf() >> b.valueOf();
         },
-        [">>>"](other) {
-            return this.valueOf() >>> other.valueOf();
-        },
-        ["~"]() {
-            return ~this.valueOf();
+        ["~"](a) {
+            return ~a.valueOf();
         },
         //logic
-        ["&&"](other) {
-            return this.valueOf() && other.valueOf();
+        ["&&"](a, b) {
+            return a.valueOf() && b.valueOf();
         },       
-        ["||"](other) {
-            return this.valueOf() || other.valueOf();
+        ["||"](a, b) {
+            return a.valueOf() || b.valueOf();
         },
-        ["!"]() {
-            return !this.valueOf();
+        ["!"](a) {
+            return !a.valueOf();
         },
         //comparision
-        ["=="](other) {
-            return this.valueOf() == other.valueOf();
+        ["=="](a, b) {
+            return a.valueOf() == b.valueOf();
         },
-        ["!="](other) {
-            return this.valueOf() != other.valueOf();
+        ["!="](a, b) {
+            return a.valueOf() != b.valueOf();
         },
-        ["<"](other) {
-            return this.valueOf() < other.valueOf();
+        ["<"](a, b) {
+            return a.valueOf() < b.valueOf();
         },
-        [">"](other) {
-            return this.valueOf() > other.valueOf();
+        [">"](a, b) {
+            return a.valueOf() > b.valueOf();
         },
-        ["<="](other) {
-            return this.valueOf() <= other.valueOf();
+        ["<="](a, b) {
+            return a.valueOf() <= b.valueOf();
         },
-        [">="](other) {
-            return this.valueOf() >= other.valueOf();
+        [">="](a, b) {
+            return a.valueOf() >= b.valueOf();
         },
         //assignment
-        ["+="](other){
-            let v = this.valueOf();
-            v += other.valueOf();
+        ["+="](a, b){
+            let v = a.valueOf();
+            v += b.valueOf();
             return v;
         },
-        ["-="](other){
-            let v = this.valueOf();
-            v -= other.valueOf();
+        ["-="](a, b){
+            let v = a.valueOf();
+            v -= b.valueOf();
             return v;
         },
-        ["*="](other){
-            let v = this.valueOf();
-            v *= other.valueOf();
+        ["*="](a, b){
+            let v = a.valueOf();
+            v *= b.valueOf();
             return v;
         },
-        ["/="](other){
-            let v = this.valueOf();
-            v /= other.valueOf();
+        ["/="](a, b){
+            let v = a.valueOf();
+            v /= b.valueOf();
             return v;
         },
-        ["%="](other){
-            let v = this.valueOf();
-            v %= other.valueOf();
+        ["%="](a, b){
+            let v = a.valueOf();
+            v %= b.valueOf();
             return v;
         },
-        ["**="](other){
-            let v = this.valueOf();
-            v **= other.valueOf();
+        ["**="](a, b){
+            let v = a.valueOf();
+            v **= b.valueOf();
             return v;
         },
-        ["<<="](other){
-            let v = this.valueOf();
-            v <<= other.valueOf();
+        ["<<="](a, b){
+            let v = a.valueOf();
+            v <<= b.valueOf();
             return v;
         },
-        [">>="](other){
-            let v = this.valueOf();
-            v >>= other.valueOf();
+        [">>="](a, b){
+            let v = a.valueOf();
+            v >>= b.valueOf();
             return v;
         },
-        [">>>="](other){
-            let v = this.valueOf();
-            v >>>= other.valueOf();
+        ["&="](a, b){
+            let v = a.valueOf();
+            v &= b.valueOf();
             return v;
         },
-        ["&="](other){
-            let v = this.valueOf();
-            v &= other.valueOf();
+        ["^="](a, b){
+            let v = a.valueOf();
+            v ^= b.valueOf();
             return v;
         },
-        ["^="](other){
-            let v = this.valueOf();
-            v ^= other.valueOf();
+        ["|="](a, b){
+            let v = a.valueOf();
+            v |= b.valueOf();
             return v;
         },
-        ["|="](other){
-            let v = this.valueOf();
-            v |= other.valueOf();
+        ["&&="](a, b){
+            let v = a.valueOf();
+            v &&= b.valueOf();
             return v;
         },
-        ["&&="](other){
-            let v = this.valueOf();
-            v &&= other.valueOf();
+        ["||="](a, b){
+            let v = a.valueOf();
+            v ||= b.valueOf();
             return v;
         },
-        ["||="](other){
-            let v = this.valueOf();
-            v ||= other.valueOf();
-            return v;
-        },
-        ["++"]() {
-            let v = this.valueOf();
+        ["++"](a) {
+            let v = a.valueOf();
             v++;
             return v;
         },
-        ["--"]() {
-            let v = this.valueOf();
+        ["--"](a) {
+            let v = a.valueOf();
             v--;
             return v;
         }
@@ -200,8 +192,8 @@ for(const v of [
 
 
 
-String.prototype[Symbol.overload]["*"] = function(other) {
-    return this.repeat(other);
+String.prototype[Symbol.overload]["*"] = function(a, b) {
+    return a.repeat(b);
 }
 
 function __multiple_decor(...decorators) {
