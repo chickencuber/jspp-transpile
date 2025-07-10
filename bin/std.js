@@ -42,7 +42,7 @@ for(const v of [
     Boolean,
     BigInt,
 ]) {
-    v[Symbol.overload] = {
+    v.prototype[Symbol.overload] = {
         //math
         ["+"](a, b) {
             return a.valueOf() + b.valueOf();
@@ -189,7 +189,7 @@ for(const v of [
     };
 }
 
-String[Symbol.overload]["*"] = function(a, b) {
+String.prototype[Symbol.overload]["*"] = function(a, b) {
     return a.repeat(b);
 }
 
