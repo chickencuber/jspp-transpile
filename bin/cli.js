@@ -82,7 +82,7 @@ return __jspp__exports__;
 }
 
 addcompile(name);
-https.get('https://cdn.jsdelivr.net/gh/chickencuber/jspp-transpile@latest/std.js', (res) => {
+https.get('https://raw.githubusercontent.com/chickencuber/jspp-transpile/refs/heads/main/std.js', (res) => {
     let data = '';
 
     res.on('data', (chunk) => data += chunk);
