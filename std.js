@@ -192,7 +192,7 @@ for(const v of [
 
 
 
-String.prototype[Symbol.overload]["*"] = function(a, b) {
+String[Symbol.overload]["*"] = function(a, b) {
     return a.repeat(b);
 }
 
