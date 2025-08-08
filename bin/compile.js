@@ -284,7 +284,7 @@ function Macros(Parser) {
                 this.type.keyword === "const" ||
                 this.type.keyword === "class" ||
                 this.type.keyword === "function" ||
-                (this.type === types.name && this.value === "mod")||
+                (this.type === types.name) ||
                 this.isLet() ||
                 this.isAsyncFunction()
         }
@@ -616,6 +616,11 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         state.write(`const ${node.ident} = (__jspp__modules__.get("${node.file}"));`);
     },
     Exporting_Statement(node, state) {
+        if(node.body?.expression?.type === "Identifier") {
+            const name = node.body.expression.name;
+            state.write(`;__jspp__exports__["${name}"] = ${name};`);
+            return;
+        }
         useSelf(node.body, state);
         if(node.body.type === "VariableDeclaration") {
             for(const n of node.body.declarations) {
