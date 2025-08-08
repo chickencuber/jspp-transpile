@@ -543,6 +543,20 @@ function Macros(Parser) {
 
 const macroParser = acorn.Parser.extend(Macros);
 
+function parseArg(node, state) {
+    if(node.type == "ObjectPattern") {
+        for(const p of node.properties) {
+            parseArg(p.value, state); 
+        }
+    } else if(node.type == "ArrayPattern") {
+       for(const p of node.elements) {
+            parseArg(p, state);
+       } 
+    } else {
+        state.write(`;__jspp__exports__["${node.name}"] = ${node.name};`);
+    }
+}
+
 const GENERATOR = Object.assign({}, astring.GENERATOR, {
     UpdateExpression(node, state) {
         if(!overloadables.includes(node.operator)) {
@@ -593,7 +607,6 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
             generator: GENERATOR,
             lineEnd: " ",
             indent: " ",
-
         });
         state.write(
             code.trim().endsWith(";") ? code.trim().slice(0, -1) : code.trim()
@@ -604,7 +617,13 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
     },
     Exporting_Statement(node, state) {
         useSelf(node.body, state);
-        state.write(`;__jspp__exports__["${node.body.id.name}"] = ${node.body.id.name};`);
+        if(node.body.type === "VariableDeclaration") {
+            for(const n of node.body.declarations) {
+                parseArg(n.id, state);                
+            }
+        } else {
+            state.write(`;__jspp__exports__["${node.body.id.name}"] = ${node.body.id.name};`);
+        }
     },
     module_start(node, state) {
         state.write(`const ${node.id.name} = (function() {
