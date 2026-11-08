@@ -175,7 +175,7 @@ function Macros(Parser) {
         }
         parseDecorator(dname, type) {
             let _export = false;
-            if(type === "Exporting_Statement") {
+            if (type === "Exporting_Statement") {
                 type = type.body;
                 _export = true;
             }
@@ -188,10 +188,10 @@ function Macros(Parser) {
                         indent: " ",
                     });
                     raw = raw.trim().endsWith(";")
-                    ? raw.trim().slice(0, -1)
-                    : raw.trim();
+                        ? raw.trim().slice(0, -1)
+                        : raw.trim();
                     const node = this.startNode();
-                    node.rawCode = `var ${name} = ${dname}(${raw}, "class");${_export?`__jspp__exports__["${name}"] = ${name}`:""};`;
+                    node.rawCode = `var ${name} = ${dname}(${raw}, "class");${_export ? `__jspp__exports__["${name}"] = ${name}` : ""};`;
                     return this.finishNode(node, "MacroInvocation");
                 }
                 case "FunctionDeclaration": {
@@ -203,14 +203,14 @@ function Macros(Parser) {
 
                     });
                     fnraw = fnraw.trim().endsWith(";")
-                    ? fnraw.trim().slice(0, -1)
-                    : fnraw.trim();
+                        ? fnraw.trim().slice(0, -1)
+                        : fnraw.trim();
                     const node = this.startNode();
-                    node.rawCode = `var ${fname} = ${dname}(${fnraw}, "function");${_export?`__jspp__exports__["${fname}"] = ${fname}`:""};`;
+                    node.rawCode = `var ${fname} = ${dname}(${fnraw}, "function");${_export ? `__jspp__exports__["${fname}"] = ${fname}` : ""};`;
                     return this.finishNode(node, "MacroInvocation");
                 }
                 case "MethodDefinition": {
-                    if(type.kind !== "method") {
+                    if (type.kind !== "method") {
                         this.raise(this.pos, 'decorators can not be put on setters or getters');
                     }
                     const computed = type.computed;
@@ -227,10 +227,10 @@ function Macros(Parser) {
 
                     });
                     fn = fn.trim().endsWith(";")
-                    ? fn.trim().slice(0, -1)
-                    : fn.trim();
+                        ? fn.trim().slice(0, -1)
+                        : fn.trim();
                     const node = this.startNode();
-                    node.rawCode = `${computed? '[': ''}${name}${computed? ']': ''}=(function() {
+                    node.rawCode = `${computed ? '[' : ''}${name}${computed ? ']' : ''}=(function() {
                         return ${dname}((${fn}).bind(this), "function");
                     }).call(this)`
                     return this.finishNode(node, "MacroInvocation");
@@ -240,15 +240,15 @@ function Macros(Parser) {
             }
         }
         parseClassElement(constructorAllowsSuper) {
-            if(this.type === types.decorator) {
+            if (this.type === types.decorator) {
                 this.next();
                 let dname;
-                if(this.type === types.parenL) {
+                if (this.type === types.parenL) {
                     dname = "__multiple_decor"
                 } else {
                     dname = this.parseExprAtom().name;
                 }
-                if(this.type === types.parenL) {
+                if (this.type === types.parenL) {
                     dname += `(${this.parseMacroArgs().join(", ")})`;
                 }
                 const type = this.parseClassElement(constructorAllowsSuper);
@@ -258,7 +258,7 @@ function Macros(Parser) {
             return super.parseClassElement(constructorAllowsSuper);
         }
         parseProc(type) {
-            if(type.type !== "FunctionDeclaration") {
+            if (type.type !== "FunctionDeclaration") {
                 this.raise(this.pos, "unexpected type " + type.type);
             }
             const code = astring.generate(type, {
@@ -277,7 +277,7 @@ function Macros(Parser) {
             literal.raw = literal.value;
             const node = this.startNode();
             node.expression = this.finishNode(literal, "Literal");
-            return this.finishNode(node, "EXC"); 
+            return this.finishNode(node, "EXC");
         }
         shouldParseExportStatement() {
             return this.type.keyword === "var" ||
@@ -292,12 +292,12 @@ function Macros(Parser) {
             if (this.type === types.decorator) {
                 this.next();
                 let dname;
-                if(this.type === types.parenL) {
+                if (this.type === types.parenL) {
                     dname = "__multiple_decor"
                 } else {
                     dname = this.parseExprAtom().name;
                 }
-                if(dname === "proc") {
+                if (dname === "proc") {
                     if (this.value !== "!") {
                         this.raise(this.pos, "you need to add '!' in order to use 'proc' decorator");
                     }
@@ -305,7 +305,7 @@ function Macros(Parser) {
                     const type = this.parseStatement(ctx, toplevel);
                     return this.parseProc(type);
                 }
-                if(this.type === types.parenL) {
+                if (this.type === types.parenL) {
                     dname += `(${this.parseMacroArgs().join(", ")})`;
                 }
                 const type = this.parseStatement(ctx, toplevel);
@@ -330,19 +330,19 @@ function Macros(Parser) {
                 node.expression = this.finishNode(literal, "Literal");
                 return this.finishNode(node, "EXC");
             }
-            if(this.type === types._import) {
-                if(this.options.sourceType !== "module" || !toplevel) {
+            if (this.type === types._import) {
+                if (this.options.sourceType !== "module" || !toplevel) {
                     this.raise(this.pos, "import and export must be on the top level")
                 }
                 this.next();
-                if(this.type.label !== "string") {
+                if (this.type.label !== "string") {
                     this.raise(this.pos, "expected a string");
                 }
                 const fs = this.value;
                 modules.push(fs);
                 this.next();
-                if(this.value !== "as" || this.type.label !== "name") {
-                    this.raise(this.pos, "expected keyword as");                   
+                if (this.value !== "as" || this.type.label !== "name") {
+                    this.raise(this.pos, "expected keyword as");
                 }
                 this.next();
                 const name = this.parseIdent().name;
@@ -351,8 +351,8 @@ function Macros(Parser) {
                 node.ident = name;
                 return this.finishNode(node, "Importing_Statement");
             }
-            if(this.type === types.name && this.value === "mod") {
-                if(this.options.sourceType !== "module" || !toplevel) {
+            if (this.type === types.name && this.value === "mod") {
+                if (this.options.sourceType !== "module" || !toplevel) {
                     this.raise(this.pos, "mod must be on the top level")
                 }
                 this.next();
@@ -363,18 +363,19 @@ function Macros(Parser) {
                 node.block = block;
                 return this.finishNode(node, "module_start");
             }
-            if(this.type === types._export) {
-                if(this.options.sourceType !== "module" || !toplevel) {
+            if (this.type === types._export) {
+                if (this.options.sourceType !== "module" || !toplevel) {
                     this.raise(this.pos, "import and export must be on the top level")
                 }
                 this.next();
-                if(this.shouldParseExportStatement()) {
+                if (this.shouldParseExportStatement()) {
                     const node = this.startNode();
                     node.body = this.parseStatement(ctx, toplevel);
                     return this.finishNode(node, "Exporting_Statement");
                 } else {
                     this.raise(this.pos, "unexpected keyword");
-                } }
+                }
+            }
             if (this.type === types.alias) {
                 this.next();
                 if (this.value !== "!") {
@@ -484,8 +485,8 @@ function Macros(Parser) {
                     return this.finishNode(node, "Identifier");
                 }
                 this.next();
-                if(macro.proc) {
-                    const args = this.parseProcArgs(); 
+                if (macro.proc) {
+                    const args = this.parseProcArgs();
                     const n = eval(macro.fn)(...args);
                     const node = this.startNode();
                     node.rawCode = n;
@@ -495,8 +496,7 @@ function Macros(Parser) {
                     if (args.length !== macro.params.length) {
                         this.raise(
                             this.pos,
-                            `macro "${name}" expected ${macro.params.length} ${
-                                macro.params.length === 1 ? "arg" : "args"
+                            `macro "${name}" expected ${macro.params.length} ${macro.params.length === 1 ? "arg" : "args"
                             }, ${args.length} were provided`
                         );
                     }
@@ -544,59 +544,106 @@ function Macros(Parser) {
 const macroParser = acorn.Parser.extend(Macros);
 
 function parseArg(node, state) {
-    if(node.type == "ObjectPattern") {
-        for(const p of node.properties) {
-            parseArg(p.value, state); 
+    if (node.type == "ObjectPattern") {
+        for (const p of node.properties) {
+            parseArg(p.value, state);
         }
-    } else if(node.type == "ArrayPattern") {
-       for(const p of node.elements) {
+    } else if (node.type == "ArrayPattern") {
+        for (const p of node.elements) {
             parseArg(p, state);
-       } 
+        }
     } else {
         state.write(`;__jspp__exports__["${node.name}"] = ${node.name};`);
     }
 }
 
+
+function getName(str, name = "v") {
+    if (!str.includes(name)) {
+        return name;
+    }
+    if (!str.includes(`_${name}`)) {
+        return `_${name}`;
+    }
+    if (!str.includes(`${name}_`)) {
+        return `${name}_`;
+    }
+    if (!str.includes(`_${name}_`)) {
+        return `_${name}_`;
+    }
+    let i = 0;
+    while (str.includes(`_${name}_` + i)) {
+        i++;
+    }
+    return `_${name}_` + i;
+}
+
+function getEmittedCode(node, state) {
+    let output = "";
+    const subState = Object.create(state);
+    subState.write = (str) => {
+        output += str;
+    };
+    useSelf(node, subState);
+    return output;
+}
+
 const GENERATOR = Object.assign({}, astring.GENERATOR, {
     UpdateExpression(node, state) {
-        if(!overloadables.includes(node.operator)) {
+        if (!overloadables.includes(node.operator)) {
             useOG(node, state);
             return;
         }
-        useSelf(node.argument, state)
-        state.write("=(");
+
+        if (node.prefix) {
+            useSelf(node.argument, state)
+            state.write("=(");
             useSelf(node.argument, state);
             state.write(`)[Symbol.overload]["${node.operator}"](`);
             useSelf(node.argument, state);
             state.write(")")
+        } else {
+            const name = getEmittedCode(node.argument, state);
+            const oldVar = getName(name, "__jspp_old__");
+            state.write(`(function(${oldVar}) {`)
+            useSelf(node.argument, state)
+            state.write("=(");
+            useSelf(node.argument, state);
+            state.write(`)[Symbol.overload]["${node.operator}"](`);
+            useSelf(node.argument, state);
+            state.write(");return " + oldVar + ";")
+            state.write("})(")
+            useSelf(node.argument, state);
+            state.write(")")
+        }
     },
     BinaryExpression(node, state) {
-        if(!overloadables.includes(node.operator)) {
+        if (!overloadables.includes(node.operator)) {
             useOG(node, state);
             return;
         }
         state.write("(");
-            useSelf(node.left, state);
-            state.write(`)[Symbol.overload]["${node.operator}"](`);
-            useSelf(node.left, state);
-            state.write(", ");
-            useSelf(node.right, state);
-            state.write(")");
+        useSelf(node.left, state);
+        state.write(`)[Symbol.overload]["${node.operator}"](`);
+        useSelf(node.left, state);
+        state.write(", ");
+        useSelf(node.right, state);
+        state.write(")");
     },
-    EXC() {},
+    EXC() { },
     AssignmentExpression(node, state) {
-        if(!overloadables.includes(node.operator)) {
+        if (!overloadables.includes(node.operator)) {
             useOG(node, state);
             return;
         }
         useSelf(node.left, state);
         state.write("=(");
-            useSelf(node.left, state);
-            state.write(`)[Symbol.overload]["${node.operator}"](`);
-            useSelf(node.left, state);
-            state.write(", ");
-            useSelf(node.right, state);
-            state.write(")");
+        useSelf(node.left, state);
+        state.write(`)[Symbol.overload]["${node.operator}"](`);
+        useSelf(node.left, state);
+        state.write(", ");
+        useSelf(node.right, state);
+        state.write(")");
     },
     MacroInvocation(node, state) {
         const ast = macroParser.parse(node.rawCode, {
@@ -616,15 +663,15 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
         state.write(`const ${node.ident} = (__jspp__modules__.get("${node.file}"));`);
     },
     Exporting_Statement(node, state) {
-        if(node.body?.expression?.type === "Identifier") {
+        if (node.body?.expression?.type === "Identifier") {
             const name = node.body.expression.name;
             state.write(`;__jspp__exports__["${name}"] = ${name};`);
             return;
         }
         useSelf(node.body, state);
-        if(node.body.type === "VariableDeclaration") {
-            for(const n of node.body.declarations) {
-                parseArg(n.id, state);                
+        if (node.body.type === "VariableDeclaration") {
+            for (const n of node.body.declarations) {
+                parseArg(n.id, state);
             }
         } else {
             state.write(`;__jspp__exports__["${node.body.id.name}"] = ${node.body.id.name};`);
@@ -633,20 +680,20 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
     module_start(node, state) {
         state.write(`const ${node.id.name} = (function() {
 const __jspp__exports__ = {};\n`)
-        useSelf(node.block, state); 
+        useSelf(node.block, state);
         state.write(`\nreturn __jspp__exports__;})();\n`)
     },
     UnaryExpression(node, state) {
         const op = node.operator;
-        if(op === "+" || op === "-" || !overloadables.includes(op)) {
+        if (op === "+" || op === "-" || !overloadables.includes(op)) {
             useOG(node, state);
             return;
         }
         state.write("(");
-            useSelf(node.argument, state);
-            state.write(`)["${op}"]()`);
+        useSelf(node.argument, state);
+        state.write(`)["${op}"]()`);
     },
-    EmptyStatement() {}
+    EmptyStatement() { }
 });
 function useSelf(node, state) {
     GENERATOR[node.type](node, state);
