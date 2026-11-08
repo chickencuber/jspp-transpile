@@ -588,6 +588,44 @@ function getEmittedCode(node, state) {
     return output;
 }
 
+function emitReference(node, state, callback) {
+    if (node.type === "Identifier") {
+        callback(node.name, null);
+        return;
+    }
+
+    if (node.type === "MemberExpression") {
+        const obj = getName(getEmittedCode(node.object, state), "__jspp_obj__");
+        const key = node.computed
+            ? getName(getEmittedCode(node.property, state), "__jspp_key__")
+            : JSON.stringify(node.property.name);
+
+        state.write("((");
+        state.write(obj);
+
+        if (node.computed) {
+            state.write(", " + key);
+        }
+
+        state.write(") => ");
+
+        callback(obj, key);
+
+        state.write(")(");
+        useSelf(node.object, state);
+
+        if (node.computed) {
+            state.write(", ");
+            useSelf(node.property, state);
+        }
+
+        state.write(")");
+        return;
+    }
+
+    throw new Error("Unsupported assignment target");
+}
+
 const GENERATOR = Object.assign({}, astring.GENERATOR, {
     UpdateExpression(node, state) {
         if (!overloadables.includes(node.operator)) {
@@ -595,36 +633,41 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
             return;
         }
 
-        if (node.prefix) {
-            useSelf(node.argument, state)
-            state.write("=(");
-            useSelf(node.argument, state);
-            state.write(`)[Symbol.overload]["${node.operator}"](`);
-            useSelf(node.argument, state);
-            state.write(")")
-        } else {
-            const name = getEmittedCode(node.argument, state);
-            const oldVar = getName(name, "__jspp_old__");
-            state.write(`(function(${oldVar}) {`)
-            useSelf(node.argument, state)
-            state.write("=(");
-            useSelf(node.argument, state);
-            state.write(`)[Symbol.overload]["${node.operator}"](`);
-            useSelf(node.argument, state);
-            state.write(");return " + oldVar + ";")
-            state.write("})(")
-            useSelf(node.argument, state);
-            state.write(")")
-        }
+        emitReference(node.argument, state, (obj, key) => {
+            const ref = key === null ? obj : `${obj}[${key}]`;
+
+            if (node.prefix) {
+                state.write(`(${ref} = ${ref}[Symbol.overload]["${node.operator}"](${ref}))`);
+            } else {
+                const old = getName(ref, "__jspp_old__");
+
+                state.write(`((${old}) => {
+                ${ref} = ${ref}[Symbol.overload]["${node.operator}"](${ref});
+                return ${old};
+            })(${ref})`);
+            }
+        });
     },
     BinaryExpression(node, state) {
         if (!overloadables.includes(node.operator)) {
             useOG(node, state);
             return;
         }
-        state.write("(");
-        useSelf(node.left, state);
-        state.write(`)[Symbol.overload]["${node.operator}"](`);
+
+        const left = getName(
+            getEmittedCode(node.left, state) + getEmittedCode(node.right, state),
+            "__jspp_left__"
+        );
+
+        const right = getName(
+            getEmittedCode(node.left, state) + getEmittedCode(node.right, state) + left,
+            "__jspp_right__"
+        );
+
+        state.write(`((${left}, ${right}) => `);
+        state.write(`${left}[Symbol.overload]["${node.operator}"](${left}, ${right})`);
+        state.write(")(");
+
         useSelf(node.left, state);
         state.write(", ");
         useSelf(node.right, state);
@@ -636,14 +679,14 @@ const GENERATOR = Object.assign({}, astring.GENERATOR, {
             useOG(node, state);
             return;
         }
-        useSelf(node.left, state);
-        state.write("=(");
-        useSelf(node.left, state);
-        state.write(`)[Symbol.overload]["${node.operator}"](`);
-        useSelf(node.left, state);
-        state.write(", ");
-        useSelf(node.right, state);
-        state.write(")");
+
+        emitReference(node.left, state, (obj, key) => {
+            const ref = key === null ? obj : `${obj}[${key}]`;
+
+            state.write(`(${ref} = ${ref}[Symbol.overload]["${node.operator}"](${ref}, `);
+            useSelf(node.right, state);
+            state.write("))");
+        });
     },
     MacroInvocation(node, state) {
         const ast = macroParser.parse(node.rawCode, {
