@@ -217,7 +217,7 @@ window.console = new Proxy(
                     if(v[Symbol.display]) {
                         return v[Symbol.display]();
                     } else {
-                        return v.toString();
+                        return String(v);
                     }
                 });
                 t[prop](...a);
