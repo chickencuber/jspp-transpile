@@ -622,6 +622,20 @@ function emitReference(node, state, callback) {
         state.write(")");
         return;
     }
+    if (node.type === "MacroInvocation") {
+        const code = node.rawCode;
+
+        if (code.endsWith(".deref")) {
+            const pointer = code.slice(1, -7);
+
+            const ptr = getName(pointer, "__jspp_ptr__");
+
+            state.write(`((${ptr}) => `);
+            callback(`${ptr}.deref`, null);
+            state.write(`)(${pointer})`);
+            return;
+        }
+    }
 
     throw new Error("Unsupported assignment target");
 }
