@@ -214,7 +214,7 @@ window.console = new Proxy(
             if(prop === "dir") return t.dir;
             return (...args) => {
                 const a = args.map((v) => {
-                    if(v[Symbol.display]) {
+                    if(v?.[Symbol.display]) {
                         return v[Symbol.display]();
                     } else {
                         return String(v);
